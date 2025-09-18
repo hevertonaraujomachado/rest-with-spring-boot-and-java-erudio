@@ -18,14 +18,61 @@ public class MathController1 {
         if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
             throw new UnsupportedMathOperationException("Please set a numeric value!");
         }
-        return covertToDouble(numberOne) + covertToDouble(numberTwo);
+        Double result = covertToDouble(numberOne) + covertToDouble(numberTwo);
+        return result;
+    }
+    //Ambiguidade de rotas
+
+    @RequestMapping(value="/subtraction/{numberOne}/{numberTwo}", method=RequestMethod.GET)
+    public Double subtraction(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
+        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
+            throw new UnsupportedMathOperationException("Please set a numeric value!");
+        }
+        Double result = covertToDouble(numberOne) - covertToDouble(numberTwo);
+        return result;
     }
 
+    @RequestMapping(value="/multiplication/{numberOne}/{numberTwo}", method=RequestMethod.GET)
+    public Double multiplication(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
+        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
+            throw new UnsupportedMathOperationException("Please set a numeric value!");
+        }
+        Double result = covertToDouble(numberOne) * covertToDouble(numberTwo);
+        return result;
+    }
+
+    @RequestMapping(value="/division/{numberOne}/{numberTwo}", method=RequestMethod.GET)
+    public Double division(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
+        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
+            throw new UnsupportedMathOperationException("Please set a numeric value!");
+        }
+        Double result = covertToDouble(numberOne) / covertToDouble(numberTwo);
+        return result;
+    }
+
+    @RequestMapping(value="/mean/{numberOne}/{numberTwo}", method=RequestMethod.GET)
+    public Double mean(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
+        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
+            throw new UnsupportedMathOperationException("Please set a numeric value!");
+        }
+        Double result = (covertToDouble(numberOne) + covertToDouble(numberTwo)) / 2;
+        return result;
+    }
+
+    @RequestMapping(value="/squareRoot/{number}", method=RequestMethod.GET)
+    public Double squareRoot(@PathVariable("number") String number) throws Exception {
+        if (!isNumeric(number)) {
+            throw new UnsupportedMathOperationException("Please set a numeric value!");
+        }
+        Double result = Math.sqrt(covertToDouble(number));
+        return result;
+    }
 
     public static Double covertToDouble(String strNumber) {
         if (strNumber == null) return 0d;
-        String number = strNumber.replaceAll(",", ".");// Moeda Americana x Brasileira
-        return Double.parseDouble(number);
+        String number = strNumber.replaceAll(",", ".");
+        if (isNumeric(number)) return Double.parseDouble(number);
+        return 0d;
     }
 
     public static boolean isNumeric(String strNumber) {
