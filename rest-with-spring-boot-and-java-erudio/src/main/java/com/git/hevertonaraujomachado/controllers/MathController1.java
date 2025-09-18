@@ -2,82 +2,65 @@ package com.git.hevertonaraujomachado.controllers;
 
 
 import com.git.hevertonaraujomachado.exception.UnsupportedMathOperationException;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import com.git.hevertonaraujomachado.request.converters.NumberUtils;
+import org.springframework.web.bind.annotation.*;
 
-import static org.apache.tomcat.util.http.parser.HttpParser.isNumeric;
 @RestController
-@RequestMapping("/math") // Define o path base para o controlador
+@RequestMapping("/math")
 public class MathController1 {
 
-    @RequestMapping(value="/sum/{numberOne}/{numberTwo}", method=RequestMethod.GET)
-    public Double sum(@PathVariable("numberOne") String numberOne,
-                      @PathVariable("numberTwo") String numberTwo) throws Exception {
-        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
+    @GetMapping("/sum/{numberOne}/{numberTwo}")
+    public Double sum(@PathVariable String numberOne,
+                      @PathVariable String numberTwo) {
+        return calculate(numberOne, numberTwo, (a, b) -> a + b);
+    }
+
+    @GetMapping("/subtraction/{numberOne}/{numberTwo}")
+    public Double subtraction(@PathVariable String numberOne,
+                              @PathVariable String numberTwo) {
+        return calculate(numberOne, numberTwo, (a, b) -> a - b);
+    }
+
+    @GetMapping("/multiplication/{numberOne}/{numberTwo}")
+    public Double multiplication(@PathVariable String numberOne,
+                                 @PathVariable String numberTwo) {
+        return calculate(numberOne, numberTwo, (a, b) -> a * b);
+    }
+
+    @GetMapping("/division/{numberOne}/{numberTwo}")
+    public Double division(@PathVariable String numberOne,
+                           @PathVariable String numberTwo) {
+        return calculate(numberOne, numberTwo, (a, b) -> {
+            if (b == 0) throw new UnsupportedMathOperationException("Division by zero is not allowed!");
+            return a / b;
+        });
+    }
+
+    @GetMapping("/mean/{numberOne}/{numberTwo}")
+    public Double mean(@PathVariable String numberOne,
+                       @PathVariable String numberTwo) {
+        return calculate(numberOne, numberTwo, (a, b) -> (a + b) / 2);
+    }
+
+    @GetMapping("/squareRoot/{number}")
+    public Double squareRoot(@PathVariable String number) {
+        if (!NumberUtils.isNumeric(number)) {
             throw new UnsupportedMathOperationException("Please set a numeric value!");
         }
-        Double result = covertToDouble(numberOne) + covertToDouble(numberTwo);
-        return result;
+        return Math.sqrt(NumberUtils.convertToDouble(number));
     }
-    //Ambiguidade de rotas
 
-    @RequestMapping(value="/subtraction/{numberOne}/{numberTwo}", method=RequestMethod.GET)
-    public Double subtraction(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
-        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
+    private Double calculate(String numberOne, String numberTwo, Operation operation) {
+        if (!NumberUtils.isNumeric(numberOne) || !NumberUtils.isNumeric(numberTwo)) {
             throw new UnsupportedMathOperationException("Please set a numeric value!");
         }
-        Double result = covertToDouble(numberOne) - covertToDouble(numberTwo);
-        return result;
+        Double a = NumberUtils.convertToDouble(numberOne);
+        Double b = NumberUtils.convertToDouble(numberTwo);
+        return operation.apply(a, b);
     }
 
-    @RequestMapping(value="/multiplication/{numberOne}/{numberTwo}", method=RequestMethod.GET)
-    public Double multiplication(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
-        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
-            throw new UnsupportedMathOperationException("Please set a numeric value!");
-        }
-        Double result = covertToDouble(numberOne) * covertToDouble(numberTwo);
-        return result;
-    }
-
-    @RequestMapping(value="/division/{numberOne}/{numberTwo}", method=RequestMethod.GET)
-    public Double division(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
-        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
-            throw new UnsupportedMathOperationException("Please set a numeric value!");
-        }
-        Double result = covertToDouble(numberOne) / covertToDouble(numberTwo);
-        return result;
-    }
-
-    @RequestMapping(value="/mean/{numberOne}/{numberTwo}", method=RequestMethod.GET)
-    public Double mean(@PathVariable("numberOne") String numberOne, @PathVariable("numberTwo") String numberTwo) throws Exception {
-        if (!isNumeric(numberOne) || !isNumeric(numberTwo)) {
-            throw new UnsupportedMathOperationException("Please set a numeric value!");
-        }
-        Double result = (covertToDouble(numberOne) + covertToDouble(numberTwo)) / 2;
-        return result;
-    }
-
-    @RequestMapping(value="/squareRoot/{number}", method=RequestMethod.GET)
-    public Double squareRoot(@PathVariable("number") String number) throws Exception {
-        if (!isNumeric(number)) {
-            throw new UnsupportedMathOperationException("Please set a numeric value!");
-        }
-        Double result = Math.sqrt(covertToDouble(number));
-        return result;
-    }
-
-    public static Double covertToDouble(String strNumber) {
-        if (strNumber == null) return 0d;
-        String number = strNumber.replaceAll(",", ".");
-        if (isNumeric(number)) return Double.parseDouble(number);
-        return 0d;
-    }
-
-    public static boolean isNumeric(String strNumber) {
-        if (strNumber == null) return false;
-        String number = strNumber.replaceAll(",", ".");
-        return number.matches("[-+]?[0-9]*\\.?[0-9]+");
+    @FunctionalInterface
+    private interface Operation {
+        Double apply(Double a, Double b);
     }
 }
