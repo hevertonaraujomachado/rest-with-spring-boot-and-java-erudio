@@ -66,4 +66,6 @@ public class Person  implements Serializable {
         return Objects.hash(id, firstName, lastName, address, gender);
     }
 
+    public void add(Person person) {
+    }
 }
